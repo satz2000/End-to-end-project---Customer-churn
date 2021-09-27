@@ -1,1 +1,1 @@
-# End-to-end-project---Customer-churn
+# Customer-churn
