@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Churn</title>
+</head>
+<h1>Customer Churn Prediction</h1>
+<body>
+ <div class="container">
+     <div class='table'>
+         <form action="submit" method="POST">
+             <label for="Dependents">Dependents:</label><br>
+             <input type="text" name="Dependents" id="Dependents" value="" ><br>
+             <textarea class="form-control" name="Dependents" rows="1" cols="20" autofocus>Previous Value: {{Dependents}}</textarea><br>
+
+             <label for="tenure">tenure:</label><br>
+             <input type="text" name="tenure" id="tenure" value=""><br>
+             <textarea class="form-control" name="tenure" rows="1" cols="20" autofocus>Previous Value: {{tenure}}</textarea><br>
+
+             <label for="OnlineSecurity"> OnlineSecurity:</label><br>
+             <input type="text" name="OnlineSecurity" id="OnlineSecurity" value=""><br>
+             <textarea class="form-control" name="OnlineSecurity" rows="1" cols="20" autofocus>Previous Value: {{OnlineSecurity}}</textarea><br>
+
+             <label for="OnlineBackup">OnlineBackup:</label><br>
+             <input type="text" name="OnlineBackup" id="OnlineBackup" value=""><br>
+             <textarea class="form-control" name="OnlineBackup" rows="1" cols="20" autofocus>Previous Value: {{OnlineBackup}}</textarea><br>
+
+             <label for="DeviceProtection">DeviceProtection:</label><br>
+             <input type="text" name="DeviceProtection" id="DeviceProtection" value=""><br>
+             <textarea class="form-control" name="DeviceProtection" rows="1" cols="20" autofocus>Previous Value: {{DeviceProtection}}</textarea><br>
+
+             <label for="TechSupport">TechSupport:</label><br>
+             <input type="text" name="TechSupport" id="TechSupport" value=""><br>
+             <textarea class="form-control" name="TechSupport" rows="1" cols="20" autofocus>Previous Value: {{TechSupport}}</textarea><br>
+
+             <label for="Contract">Contract:</label><br>
+             <input type="text" name="Contract" id="Contract" value=""><br>
+             <textarea class="form-control" name="Contract" rows="1" cols="20" autofocus>Previous Value: {{Contract}}</textarea><br>
+
+             <label for="PaperlessBilling">PaperlessBilling:</label><br>
+             <input type="text" name="PaperlessBilling" id="PaperlessBilling" value=""><br>
+             <textarea class="form-control" name="PaperlessBilling" rows="1" cols="20" autofocus>Previous Value: {{PaperlessBilling}}</textarea><br>
+
+             <label for="MonthlyCharges">MonthlyCharges:</label><br>
+             <input type="text" name="MonthlyCharges" id="MonthlyCharges" value=""><br>
+             <textarea class="form-control" name="MonthlyCharges" rows="1" cols="20" autofocus>Previous Value: {{MonthlyCharges}}</textarea><br>
+
+             <label for="TotalCharges">TotalCharges:</label><br>
+             <input type="text" name="TotalCharges" id="TotalCharges" value=""><br>
+             <textarea class="form-control" name="TotalCharges" rows="1" cols="20" autofocus>Previous Value: {{TotalCharges}}</textarea><br>
+
+             <div class="col-sm-3">
+			 <button type="submit" class="btn btn-primary" name="submit">SUBMIT</button>
+			 </div>
+
+         </form>
+         <div class="row">
+             <div class="col-sm-9">
+			 <textarea class="form-control" id="op1" name="op1" rows="2" cols="40" autofocus>{{op1}}</textarea><br>
+			 <textarea class="form-control" id="op2" name="op2" rows="2" cols="40" autofocus>{{op2}}</textarea></div>
+		</div>
+     </div>
+ </div>
+</body>
+</html>
