@@ -16,7 +16,7 @@
   * Fit into Algorithm (ML Algorithm)
   * Hyper Parameter Tunning (RandomSearchCV)
   * Dump model (Pickle)
-  * Creating Flask API (To deploy model)
+  * Creating Web Application using Flask
 #### Packages Used:
 This project requires **Python** and the following packages are in below:
   * [Numpy](https://numpy.org/)
