@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 import pickle
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
@@ -10,7 +10,7 @@ app = Flask(__name__)
 def home_page():
     return render_template('home.html')
 
-@app.route("/submit", methods=['POST'])
+@app.route("/", methods=['POST'])
 def predict():
 
     """ Selected feature are Dependents, tenure, OnlineSecurity,
