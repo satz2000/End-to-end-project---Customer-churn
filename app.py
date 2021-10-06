@@ -42,14 +42,14 @@ def predict():
 
     single = model.predict(df)
     probability = model.predict_proba(df)[:, 1]
-
+    probability = probability*100
 
     if single == 1:
         op1 = "This Customer is likely to be Churned!"
-        op2 = f"Confidence level is {np.round(probability*100, 2)}"
+        op2 = f"Confidence level is {np.round(probability[0], 2)}"
     else:
         op1 = "This Customer is likely to be Continue!"
-        op2 = f"Confidence level is {np.round(probability*100, 2)}"
+        op2 = f"Confidence level is {np.round(probability[0], 2)}"
 
     return render_template("home.html", op1=op1, op2=op2,
                            Dependents=request.form['Dependents'],
@@ -65,4 +65,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
