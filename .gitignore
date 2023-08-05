@@ -1,2 +1,3 @@
 #local env
 *.code-workspace
+*__pycache__
