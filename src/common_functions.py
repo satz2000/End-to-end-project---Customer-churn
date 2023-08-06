@@ -1,17 +1,18 @@
+import pickle
 import re
+from pathlib import Path
 from typing import Tuple
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sn
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline
+from imblearn.under_sampling import RandomUnderSampler
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.impute import SimpleImputer
-from imblearn.pipeline import Pipeline
-from imblearn.over_sampling import SMOTE
-from imblearn.under_sampling import RandomUnderSampler
-from sklearn.metrics import (PrecisionRecallDisplay,
-                             confusion_matrix)
+from sklearn.metrics import PrecisionRecallDisplay, confusion_matrix
 from sklearn.model_selection import (GridSearchCV, StratifiedShuffleSplit,
                                      train_test_split)
 # from sklearn.pipeline import Pipeline
@@ -72,7 +73,6 @@ def build_sklearn_pipeline(df: pd.DataFrame, y_col_name: str, model_name: str, m
 
     transformer = build_column_transformer_for_df(df.drop(y_col_name, axis=1))
 
-
     steps = [
         ('preprocessor', transformer),
         ('under', RandomUnderSampler()),
@@ -102,9 +102,9 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
     default_oversampling_rates = [0.3, 0.5, 0.7, 1]
     param_grid = param_grid
     default_param_grid = {
-        "pca__n_components" : default_pca_n_components,
-        "under__sampling_strategy" : default_undesampling_rates,
-        "over__sampling_strategy" : default_oversampling_rates
+        "pca__n_components": default_pca_n_components,
+        "under__sampling_strategy": default_undesampling_rates,
+        "over__sampling_strategy": default_oversampling_rates
     }
 
     for param in default_param_grid.keys():
@@ -146,3 +146,25 @@ def evaluate_model(best_pipeline: Pipeline, fit_le: LabelEncoder, test: pd.DataF
     PrecisionRecallDisplay.from_predictions(
         test_y_encoded, test_predictions_proba[:, 1], pos_label=1)
     plt.show()
+
+
+def write_pipeline(pipeline: Pipeline, model_name: str, dataset_name: str) -> None:
+    """
+    Writes the pipeline to a pickle file
+
+    Args:
+        pipeline (Pipeline): the pipeline to be written
+        model_name (str): the name of the model
+        dataset_name (str): the name of the dataset
+    """
+    pipeline_base_dir = f"../models/{dataset_name}/"
+    Path(pipeline_base_dir).mkdir(parents=True, exist_ok=True)
+    file = f"{model_name}.pkl"
+    pipeline_path = pipeline_base_dir + file
+    with open(pipeline_path, 'wb') as f:
+        pickle.dump(pipeline, f)
+
+    # # to load the pipeline
+    # with open(pipeline_path, 'rb') as f:
+    #     best_pipeline_log_reg = pickle.load(f)
+    #     best_pipeline_log_reg.predict(train.head().drop(y, axis=1))
