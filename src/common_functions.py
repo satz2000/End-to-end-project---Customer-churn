@@ -132,7 +132,7 @@ def evaluate_model(best_pipeline: Pipeline, fit_le: LabelEncoder, test: pd.DataF
         test.drop(y_col_name, axis=1))
 
     test_y_encoded = fit_le.transform(test[y_col_name])
-    decoded_labels = fit_le.transform(clf.classes_)
+    decoded_labels = fit_le.inverse_transform(clf.classes_)
     cm = confusion_matrix(
         test_y_encoded, test_predictions, labels=decoded_labels)
 
