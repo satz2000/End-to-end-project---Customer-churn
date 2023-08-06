@@ -67,11 +67,12 @@ def build_column_transformer_for_df(train_x: pd.DataFrame) -> ColumnTransformer:
     return transformer
 
 
-def build_sklearn_pipeline(df: pd.DataFrame, y_col_name: str, model_name: str, model: object) -> Pipeline:
+def build_sklearn_pipeline(df: pd.DataFrame, y_col_name: str, model_name: str, model: object, transformer: ColumnTransformer = None) -> Pipeline:
     """Builds a sklearn pipeline for churn prediction."""
     # Define the steps
-
-    transformer = build_column_transformer_for_df(df.drop(y_col_name, axis=1))
+    if transformer == None:
+        transformer = build_column_transformer_for_df(
+            df.drop(y_col_name, axis=1))
 
     steps = [
         ('preprocessor', transformer),
@@ -85,11 +86,12 @@ def build_sklearn_pipeline(df: pd.DataFrame, y_col_name: str, model_name: str, m
     return pipeline
 
 
-def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, model_name: str, model: object, fit_le: LabelEncoder, param_grid: dict, n_folds: int = 5,) -> GridSearchCV:
+def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, model_name: str, model: object, fit_le: LabelEncoder, param_grid: dict, n_folds: int = 5, pipeline: Pipeline = None) -> GridSearchCV:
     """Performs a grid search using a sklearn pipeline."""
     # Get the pipeline
-    pipeline = build_sklearn_pipeline(
-        train, y_col_name=y_col_name, model=model, model_name=model_name)
+    if pipeline == None:
+        pipeline = build_sklearn_pipeline(
+            train, y_col_name=y_col_name, model=model, model_name=model_name)
 
     # define stratiefied shuffle split:
     sss = StratifiedShuffleSplit(
@@ -156,6 +158,7 @@ def write_pipeline(pipeline: Pipeline, model_name: str, dataset_name: str) -> No
         pipeline (Pipeline): the pipeline to be written
         model_name (str): the name of the model
         dataset_name (str): the name of the dataset
+
     """
     pipeline_base_dir = f"../models/{dataset_name}/"
     Path(pipeline_base_dir).mkdir(parents=True, exist_ok=True)
@@ -164,7 +167,21 @@ def write_pipeline(pipeline: Pipeline, model_name: str, dataset_name: str) -> No
     with open(pipeline_path, 'wb') as f:
         pickle.dump(pipeline, f)
 
-    # # to load the pipeline
-    # with open(pipeline_path, 'rb') as f:
-    #     best_pipeline_log_reg = pickle.load(f)
-    #     best_pipeline_log_reg.predict(train.head().drop(y, axis=1))
+
+def load_pipeline(model_name: str, dataset_name: str) -> Pipeline:
+    """
+    Loads the pipeline from a pickle file
+
+    Args:
+        model_name (str): the name of the model
+        dataset_name (str): the name of the dataset
+
+    Returns:
+        Pipeline: the loaded pipeline
+    """
+    pipeline_base_dir = f"../models/{dataset_name}/"
+    file = f"{model_name}.pkl"
+    pipeline_path = pipeline_base_dir + file
+    with open(pipeline_path, 'rb') as f:
+        best_pipeline = pickle.load(f)
+    return best_pipeline
