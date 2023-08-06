@@ -95,21 +95,21 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
     sss = StratifiedShuffleSplit(
         n_splits=n_folds, test_size=0.2, random_state=0)
 
-    # # Define the hyperparameter grid
-    # default_pca_n_components = [15, 20, 25, 30, 35, 50, 65]
-    # # example from fin_churn
-    # default_undesampling_rates = [0.3, 0.5, 0.7, 1]
-    # default_oversampling_rates = [0.3, 0.5, 0.7, 1]
-    # param_grid = param_grid
-    # default_param_grid = {
-    #     "pca__n_components" : default_pca_n_components,
-    #     # "under__sampling_strategy" : default_undesampling_rates,
-    #     "over__sampling_strategy" : default_oversampling_rates
-    # }
+    # Define the hyperparameter grid
+    default_pca_n_components = [15, 20, 25, 30, 35, 50, 65]
+    # example from fin_churn
+    default_undesampling_rates = [0.3, 0.5, 0.7, 1]
+    default_oversampling_rates = [0.3, 0.5, 0.7, 1]
+    param_grid = param_grid
+    default_param_grid = {
+        "pca__n_components" : default_pca_n_components,
+        "under__sampling_strategy" : default_undesampling_rates,
+        "over__sampling_strategy" : default_oversampling_rates
+    }
 
-    # for param in default_param_grid.keys():
-    #     if param not in param_grid.keys():
-    #         param_grid[param] = default_param_grid[param]
+    for param in default_param_grid.keys():
+        if param not in param_grid.keys():
+            param_grid[param] = default_param_grid[param]
 
     # Perform the grid search
     grid = GridSearchCV(pipeline, param_grid, cv=sss,
@@ -134,7 +134,7 @@ def evaluate_model(best_pipeline: Pipeline, fit_le: LabelEncoder, test: pd.DataF
     test_y_encoded = fit_le.transform(test[y_col_name])
     decoded_labels = fit_le.inverse_transform(clf.classes_)
     cm = confusion_matrix(
-        test_y_encoded, test_predictions, labels=decoded_labels)
+        test_y_encoded, test_predictions, labels=clf.classes_)
 
     _fig, _ax = plt.subplots(figsize=(7.5, 7.5))
     sn.heatmap(cm, annot=True, fmt="d", xticklabels=decoded_labels,
