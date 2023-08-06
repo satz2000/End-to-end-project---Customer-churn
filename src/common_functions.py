@@ -7,15 +7,16 @@ import seaborn as sn
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (ConfusionMatrixDisplay, PrecisionRecallDisplay,
+from imblearn.pipeline import Pipeline
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
+from sklearn.metrics import (PrecisionRecallDisplay,
                              confusion_matrix)
 from sklearn.model_selection import (GridSearchCV, StratifiedShuffleSplit,
                                      train_test_split)
-from sklearn.pipeline import Pipeline
+# from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import (LabelEncoder, OneHotEncoder, OrdinalEncoder,
                                    StandardScaler)
-from xgboost import XGBClassifier
 
 
 def to_snake_case(name: str) -> str:
@@ -37,6 +38,7 @@ def to_snake_case(name: str) -> str:
     name = re.sub('__([A-Z])', r'_\1', name)
     name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name)
     return name.lower().strip()
+
 
 def build_column_transformer_for_df(train_x: pd.DataFrame) -> ColumnTransformer:
     """Builds a column transformer for a pandas dataframe."""
@@ -70,8 +72,11 @@ def build_sklearn_pipeline(df: pd.DataFrame, y_col_name: str, model_name: str, m
 
     transformer = build_column_transformer_for_df(df.drop(y_col_name, axis=1))
 
+
     steps = [
         ('preprocessor', transformer),
+        ('under', RandomUnderSampler()),
+        ('over', SMOTE(k_neighbors=5)),
         ('pca', PCA()),
         (model_name, model)
     ]
@@ -80,7 +85,7 @@ def build_sklearn_pipeline(df: pd.DataFrame, y_col_name: str, model_name: str, m
     return pipeline
 
 
-def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, model_name: str, model: object, fit_le: LabelEncoder, param_grid_model: dict, n_folds: int = 5,) -> GridSearchCV:
+def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, model_name: str, model: object, fit_le: LabelEncoder, param_grid: dict, n_folds: int = 5,) -> GridSearchCV:
     """Performs a grid search using a sklearn pipeline."""
     # Get the pipeline
     pipeline = build_sklearn_pipeline(
@@ -90,9 +95,21 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
     sss = StratifiedShuffleSplit(
         n_splits=n_folds, test_size=0.2, random_state=0)
 
-    # Define the hyperparameter grid
-    param_grid = param_grid_model
-    param_grid["pca__n_components"] = [15, 20, 25, 30, 35, 50, 65]
+    # # Define the hyperparameter grid
+    # default_pca_n_components = [15, 20, 25, 30, 35, 50, 65]
+    # # example from fin_churn
+    # default_undesampling_rates = [0.3, 0.5, 0.7, 1]
+    # default_oversampling_rates = [0.3, 0.5, 0.7, 1]
+    # param_grid = param_grid
+    # default_param_grid = {
+    #     "pca__n_components" : default_pca_n_components,
+    #     # "under__sampling_strategy" : default_undesampling_rates,
+    #     "over__sampling_strategy" : default_oversampling_rates
+    # }
+
+    # for param in default_param_grid.keys():
+    #     if param not in param_grid.keys():
+    #         param_grid[param] = default_param_grid[param]
 
     # Perform the grid search
     grid = GridSearchCV(pipeline, param_grid, cv=sss,
@@ -106,7 +123,7 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
     return grid
 
 
-def evaluate_model(best_pipeline: Pipeline, fit_le: LabelEncoder, test: pd.DataFrame, y_col_name:str) -> None:
+def evaluate_model(best_pipeline: Pipeline, fit_le: LabelEncoder, test: pd.DataFrame, y_col_name: str) -> None:
     clf = best_pipeline["logistic"]
 
     test_predictions = best_pipeline.predict(
@@ -115,11 +132,13 @@ def evaluate_model(best_pipeline: Pipeline, fit_le: LabelEncoder, test: pd.DataF
         test.drop(y_col_name, axis=1))
 
     test_y_encoded = fit_le.transform(test[y_col_name])
+    decoded_labels = fit_le.transform(clf.classes_)
     cm = confusion_matrix(
-        test_y_encoded, test_predictions, labels=clf.classes_)
-    fig, ax = plt.subplots(figsize=(7.5, 7.5))
-    sn.heatmap(cm, annot=True, fmt="d", xticklabels=fit_le.classes_,
-               yticklabels=fit_le.classes_)
+        test_y_encoded, test_predictions, labels=decoded_labels)
+
+    _fig, _ax = plt.subplots(figsize=(7.5, 7.5))
+    sn.heatmap(cm, annot=True, fmt="d", xticklabels=decoded_labels,
+               yticklabels=decoded_labels)
     plt.xlabel('Predicted', fontsize=12)
     plt.ylabel('True', fontsize=12)
 
