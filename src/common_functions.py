@@ -115,7 +115,7 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
 
     # Perform the grid search
     grid = GridSearchCV(pipeline, param_grid, cv=sss,
-                        n_jobs=-1, scoring="roc_auc", verbose=1)
+                        n_jobs=-1, scoring="roc_auc", verbose=3)
     encoded_labels = fit_le.transform(train[y_col_name])
     grid.fit(train.drop(y_col_name, axis=1), encoded_labels)
     # Print the results
