@@ -126,6 +126,20 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
 
 
 def evaluate_model(best_pipeline: Pipeline, fit_le: LabelEncoder, test: pd.DataFrame, y_col_name: str) -> None:
+    """
+    Evaluates a model using a test set.
+
+    Parameters
+    ----------
+    best_pipeline : Pipeline
+        The best pipeline found by the grid search.
+    fit_le : LabelEncoder
+        The label encoder fitted on the training set.
+    test : pd.DataFrame 
+        The test set.
+    y_col_name : str
+        The name of the target column.
+    """
     clf = best_pipeline["logistic"]
 
     test_predictions = best_pipeline.predict(
