@@ -1,7 +1,7 @@
 import pickle
 import re
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Union
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -13,8 +13,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import PrecisionRecallDisplay, confusion_matrix
-from sklearn.model_selection import (GridSearchCV, StratifiedShuffleSplit,
-                                     train_test_split)
+from sklearn.model_selection import (
+    GridSearchCV, RandomizedSearchCV, StratifiedShuffleSplit)
 # from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import (LabelEncoder, OneHotEncoder, OrdinalEncoder,
                                    StandardScaler)
@@ -86,8 +86,13 @@ def build_sklearn_pipeline(df: pd.DataFrame, y_col_name: str, model_name: str, m
     return pipeline
 
 
-def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, model_name: str, model: object, fit_le: LabelEncoder, param_grid: dict, verbose: int, n_folds: int = 5, pipeline: Pipeline = None) -> GridSearchCV:
-    """Performs a grid search using a sklearn pipeline."""
+def sklearn_gridsearch_using_pipeline(
+        train: pd.DataFrame, y_col_name: str,
+        model_name: str, model: object,
+        fit_le: LabelEncoder, param_grid: dict,
+        verbose: int, randomized: bool = False,
+        n_folds: int = 5, pipeline: Pipeline = None) -> Union[GridSearchCV, RandomizedSearchCV]:
+    """Performs a (randomized) grid search using a sklearn pipeline."""
     # Get the pipeline
     if pipeline == None:
         pipeline = build_sklearn_pipeline(
@@ -114,8 +119,23 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
             param_grid[param] = default_param_grid[param]
 
     # Perform the grid search
-    grid = GridSearchCV(pipeline, param_grid, cv=sss,
-                        n_jobs=-1, scoring="roc_auc", verbose=verbose)
+    common_params = {
+        'estimator': pipeline,
+        'scoring': "roc_auc",
+        'verbose': verbose,
+        'n_jobs': -1,
+        'cv': sss
+    }
+
+    if randomized:
+        common_params["param_distributions"] = param_grid
+        common_params["n_iter"] = 10
+        common_params["random_state"] = 0
+        grid = RandomizedSearchCV(**common_params)
+    else:
+        common_params["param_grid"] = param_grid
+        grid = GridSearchCV(**common_params)
+
     encoded_labels = fit_le.transform(train[y_col_name])
     grid.fit(train.drop(y_col_name, axis=1), encoded_labels)
     # Print the results
@@ -125,7 +145,12 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
     return grid
 
 
-def evaluate_model(best_pipeline: Pipeline, fit_le: LabelEncoder, test: pd.DataFrame, y_col_name: str) -> None:
+def evaluate_model(
+        best_pipeline: Pipeline,
+        fit_le: LabelEncoder,
+        test: pd.DataFrame,
+        y_col_name: str,
+        model_name: str) -> None:
     """
     Evaluates a model using a test set.
 
@@ -140,7 +165,7 @@ def evaluate_model(best_pipeline: Pipeline, fit_le: LabelEncoder, test: pd.DataF
     y_col_name : str
         The name of the target column.
     """
-    clf = best_pipeline["logistic"]
+    clf = best_pipeline[model_name]
 
     test_predictions = best_pipeline.predict(
         test.drop(y_col_name, axis=1))
