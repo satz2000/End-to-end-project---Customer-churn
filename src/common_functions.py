@@ -86,7 +86,7 @@ def build_sklearn_pipeline(df: pd.DataFrame, y_col_name: str, model_name: str, m
     return pipeline
 
 
-def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, model_name: str, model: object, fit_le: LabelEncoder, param_grid: dict, n_folds: int = 5, pipeline: Pipeline = None) -> GridSearchCV:
+def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, model_name: str, model: object, fit_le: LabelEncoder, param_grid: dict, verbose: int, n_folds: int = 5, pipeline: Pipeline = None) -> GridSearchCV:
     """Performs a grid search using a sklearn pipeline."""
     # Get the pipeline
     if pipeline == None:
@@ -115,7 +115,7 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
 
     # Perform the grid search
     grid = GridSearchCV(pipeline, param_grid, cv=sss,
-                        n_jobs=-1, scoring="roc_auc", verbose=1)
+                        n_jobs=-1, scoring="roc_auc", verbose=verbose)
     encoded_labels = fit_le.transform(train[y_col_name])
     grid.fit(train.drop(y_col_name, axis=1), encoded_labels)
     # Print the results
@@ -126,6 +126,20 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
 
 
 def evaluate_model(best_pipeline: Pipeline, fit_le: LabelEncoder, test: pd.DataFrame, y_col_name: str) -> None:
+    """
+    Evaluates a model using a test set.
+
+    Parameters
+    ----------
+    best_pipeline : Pipeline
+        The best pipeline found by the grid search.
+    fit_le : LabelEncoder
+        The label encoder fitted on the training set.
+    test : pd.DataFrame 
+        The test set.
+    y_col_name : str
+        The name of the target column.
+    """
     clf = best_pipeline["logistic"]
 
     test_predictions = best_pipeline.predict(
