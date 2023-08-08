@@ -86,7 +86,7 @@ def build_sklearn_pipeline(df: pd.DataFrame, y_col_name: str, model_name: str, m
     return pipeline
 
 
-def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, model_name: str, model: object, fit_le: LabelEncoder, param_grid: dict, n_folds: int = 5, pipeline: Pipeline = None) -> GridSearchCV:
+def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, model_name: str, model: object, fit_le: LabelEncoder, param_grid: dict, verbose: int, n_folds: int = 5, pipeline: Pipeline = None) -> GridSearchCV:
     """Performs a grid search using a sklearn pipeline."""
     # Get the pipeline
     if pipeline == None:
@@ -115,7 +115,7 @@ def sklearn_gridsearch_using_pipeline(train: pd.DataFrame, y_col_name: str, mode
 
     # Perform the grid search
     grid = GridSearchCV(pipeline, param_grid, cv=sss,
-                        n_jobs=-1, scoring="roc_auc", verbose=3)
+                        n_jobs=-1, scoring="roc_auc", verbose=verbose)
     encoded_labels = fit_le.transform(train[y_col_name])
     grid.fit(train.drop(y_col_name, axis=1), encoded_labels)
     # Print the results
