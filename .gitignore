@@ -1,0 +1,4 @@
+#local env
+*.code-workspace
+*__pycache__
+*.pkl
